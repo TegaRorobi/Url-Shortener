@@ -26,10 +26,15 @@ class UrlShortener:
 			'long_url':url 
 		}
 
-		response = requests.post(self.endpoint, headers=self.headers, data=json.dumps(self.data))
-		if response.status_code == 200:
-			self.logger.info("Successfully shortened one(1) url.")
-			return json.loads(response.content)['link']
+		trials = 0
+		while trials != self.max_retries:
+			response = requests.post(self.endpoint, headers=self.headers, data=json.dumps(self.data))
+			trials += 1
+			if response.status_code == 200:
+				self.logger.info("Successfully shortened one(1) url.")
+				return json.loads(response.content)['link']
+			else:
+				self.logger.info(f"Unsuccesful shorten after {trials} trial(s), retrying...")
 
 		raise Exception(f"Failed. Status code: {response.status_code}")
 
